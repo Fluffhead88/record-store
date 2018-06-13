@@ -11,6 +11,7 @@ class Band(models.Model):
     band_name = models.CharField(max_length=255)
 
 class Album(models.Model):
+    #band = models.ForeignKey(Band, on_delete=models.CASCADE, default="No band provided")
     release_date = models.CharField(max_length=25, default="No date provided")
     title = models.CharField(max_length=255)
     tracks = models.CharField(max_length=400)
