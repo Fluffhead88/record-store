@@ -21,20 +21,22 @@ class BandListCreateAPIView(generics.ListCreateAPIView):
 
 
 class BandRetrieveDestroyAPIView(generics.RetrieveDestroyAPIView):
-    permisison_classes = [IsOwnerOrReadOnly]
-    queryset = Band.objects.all()
+    permission_classes = [IsOwnerOrReadOnly]
     serializer_class = BandSerializer
+
+    def get_queryset(self):
+        return Band.objects.filter(user=self.request.user)
 
 class AlbumListCreateAPIView(APIView):
 
     def get(self, request):
-        #user = self.request.user
         all_albums = Album.objects.all()
         serialized_albums = AlbumSerializer(all_albums, many=True)
         return Response(serialized_albums.data, 200)
 
     def post(self, request):
-        permisison_classes = [IsOwnerOrReadOnly]
+        permission_classes = [IsOwnerOrReadOnly]
+        owner = self.request.user
         band_id = request.POST.get('band', None)
         user_id = request.POST.get('user', None)
         release_date = request.POST['release_date']
@@ -50,14 +52,13 @@ class AlbumListCreateAPIView(APIView):
 
 class AlbumDetailAPIView(APIView):
     def get(self, request, pk):
-        #user = self.request.user
         album = Album.objects.get(id=pk)
         serialized_album = AlbumSerializer(album)
         return Response(serialized_album.data, 200)
 
     def put(self, request, pk):
         permission_classes = [IsOwnerOrReadOnly]
-        user = self.request.user
+        owner = self.request.user
         album = Album.objects.get(id=pk)
         album.band_id = request.POST.get('band', None)
         album.user_id = request.POST.get('user', None)
@@ -71,8 +72,14 @@ class AlbumDetailAPIView(APIView):
         return Response(serialized_album.data, 200)
 
     def delete(self, response, pk):
-        permisison_classes = [IsOwnerOrReadOnly]
-        user = self.request.user
+        permission_classes = [IsOwnerOrReadOnly]
+        owner = self.request.user
         album = Album.objects.get(id=pk)
         album.delete()
         return Response("", 204)
+
+"""class AlbumViewSet(viewsets.ReadOnlyModelViewSet):
+   queryset = Album.objects.all()
+   serializer_class = AlbumSerializer
+   filter_backends = (filters.SearchFilter,)
+   search_fields = ('band', 'tracks','title', 'genre')"""

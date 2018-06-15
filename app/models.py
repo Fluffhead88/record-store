@@ -16,8 +16,8 @@ class Band(models.Model):
     #    return self.album_set.count()
 
 class Album(models.Model):
-    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
-    band = models.ForeignKey(Band, null= True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default = 0)
+    band = models.ForeignKey(Band, on_delete=models.CASCADE, default = 0)
     #created = models.DateTimeField(auto_now_add=True)
     release_date = models.CharField(max_length=25, default="No date provided")
     title = models.CharField(max_length=255)
