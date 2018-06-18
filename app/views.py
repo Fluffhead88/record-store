@@ -3,6 +3,7 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
+from django_filters.rest_framework import DjangoFilterBackend
 from app.models import Band, Album
 from app.serializers import BandSerializer, AlbumSerializer
 from app.permissions import IsOwnerOrReadOnly
@@ -58,7 +59,7 @@ class AlbumDetailAPIView(APIView):
 
     def put(self, request, pk):
         permission_classes = [IsOwnerOrReadOnly]
-        owner = self.request.user
+        user = self.request.user
         album = Album.objects.get(id=pk)
         album.band_id = request.POST.get('band', None)
         album.user_id = request.POST.get('user', None)
@@ -73,13 +74,13 @@ class AlbumDetailAPIView(APIView):
 
     def delete(self, response, pk):
         permission_classes = [IsOwnerOrReadOnly]
-        owner = self.request.user
+        user = self.request.user
         album = Album.objects.get(id=pk)
         album.delete()
         return Response("", 204)
 
-"""class AlbumViewSet(viewsets.ReadOnlyModelViewSet):
-   queryset = Album.objects.all()
-   serializer_class = AlbumSerializer
-   filter_backends = (filters.SearchFilter,)
-   search_fields = ('band', 'tracks','title', 'genre')"""
+"""class AlbumListView(generics.ListAPIView):
+    queryset = Album.objects.all()
+    serializer_class = AlbumSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('title', 'tracks', 'genre')"""
