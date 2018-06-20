@@ -8,6 +8,7 @@ from app.models import Band, Album
 from app.serializers import BandSerializer, AlbumSerializer
 from app.permissions import IsOwnerOrReadOnly
 
+
 class BandListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = BandSerializer
 
@@ -28,12 +29,24 @@ class BandRetrieveDestroyAPIView(generics.RetrieveDestroyAPIView):
     def get_queryset(self):
         return Band.objects.filter(user=self.request.user)
 
+
 class AlbumListCreateAPIView(APIView):
 
     def get(self, request):
-        all_albums = Album.objects.all()
+        all_albums = self.get_queryset()
         serialized_albums = AlbumSerializer(all_albums, many=True)
         return Response(serialized_albums.data, 200)
+
+    def get_queryset(self):
+        queryset = Album.objects.all()
+        title = self.request.query_params.get('title')
+        band = self.request.query_params.get('band')
+        if title:
+            queryset = queryset.filter(title=title)
+        if band:
+            queryset = queryset.filter(band_id=band)
+
+        return queryset
 
     def post(self, request):
         permission_classes = [IsOwnerOrReadOnly]
@@ -45,10 +58,10 @@ class AlbumListCreateAPIView(APIView):
         tracks = request.POST['tracks']
         genre = request.POST['genre']
         notes = request.POST['notes']
-        new_album = Album.objects.create(release_date=release_date, title=title, tracks=tracks, genre=genre, notes=notes)
+        new_album = Album.objects.create(
+            release_date=release_date, title=title, tracks=tracks, genre=genre, notes=notes)
         serialized_album = AlbumSerializer(new_album)
         return Response(serialized_album.data, 201)
-
 
 
 class AlbumDetailAPIView(APIView):
@@ -78,6 +91,7 @@ class AlbumDetailAPIView(APIView):
         album = Album.objects.get(id=pk)
         album.delete()
         return Response("", 204)
+
 
 """class AlbumListView(generics.ListAPIView):
     queryset = Album.objects.all()
